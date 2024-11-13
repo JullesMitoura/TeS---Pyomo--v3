@@ -54,7 +54,7 @@ class RunGibbs():
             for P in P_vals:
                 if reference_index is not None:
                     for n in n_vals:
-                        initial_copy = self.initial.copy()
+                        initial_copy = self.initial.astype(float).copy()
                         initial_copy[reference_index] = n
                         result = gibbs.solve_gibbs(initial_copy, T, P)
 

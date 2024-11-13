@@ -48,11 +48,7 @@ class Gibbs:
         return tuple(bnds_aux)
 
     def solve_gibbs(self, initial, T, P, progress_callback=None):
-        """
-        Solves the Gibbs energy minimization problem for the system at temperature T and pressure P.
-        Receives a progress_callback that updates the progress bar.
-        """
-        initial[initial == 0] = 0.0001
+        initial[initial == 0] = 0.00001  # Evita zeros
         bnds = self.bnds_values(initial)
         model = pyo.ConcreteModel()
         model.n = pyo.Var(range(self.total_components), domain=pyo.NonNegativeReals, bounds=lambda m, i: bnds[i])
@@ -61,19 +57,13 @@ class Gibbs:
         gases = self.identify_phases('g')
 
         def gibbs_rule(model):
-            """
-            Objective function for Gibbs energy minimization.
-            """
             R = 8.314  # J/mol·K
             df_pad = gibbs_pad(T, self.data)
-
-            # Calculate fugacity for all components
             phii = fug(T=T, P=P, eq=self.equation, n=model.n, components=self.data)
-            
-            if isinstance(phii, (int, float)):  # Ensure fugacity is iterable
+
+            if isinstance(phii, (int, float)):  
                 phii = [phii] * self.total_components
 
-            # Calculate mi_gas for gas-phase components
             mi_gas = [
                 df_pad[i] + R * T * (
                     pyo.log(phii[i]) + 
@@ -82,13 +72,9 @@ class Gibbs:
                 ) for i in gases
             ]
 
-            # Calculate mi_solids for solid-phase components
             mi_solids = [df_pad[i] for i in solids]
 
-            # Regularization term
-            regularization_term = 1e-4
-
-            # Total Gibbs energy is the sum of the gas and solid terms
+            regularization_term = 1e-6
             total_gibbs = sum(mi_gas[i] * model.n[gases[i]] for i in range(len(mi_gas))) + \
                         sum(mi_solids[i] * model.n[solids[i]] for i in range(len(mi_solids))) + \
                         regularization_term
@@ -97,24 +83,19 @@ class Gibbs:
 
         model.obj = pyo.Objective(rule=gibbs_rule, sense=pyo.minimize)
 
-        def element_balance_rule(model, i):
-            """
-            Mass balance constraint for each species.
-            """
-            tolerance = 1e-8
-            left_hand_side = sum(self.A[j, i] * model.n[j] for j in range(self.total_components))
-            right_hand_side = sum(self.A[j, i] * initial[j] for j in range(self.total_components))
-            return pyo.inequality(-tolerance, left_hand_side - right_hand_side, tolerance)
-
-        # Apply element balance constraints
+        # Adiciona restrições de balanço sem lambdas aninhados
+        model.element_balance = pyo.ConstraintList()
         for i in range(self.total_species):
-            def create_constraint(i):
-                return pyo.Constraint(rule=lambda m: element_balance_rule(m, i))
-            
-            setattr(model, f'element_balance_{i + 1}', create_constraint(i))
+            tolerance = 1e-8
+            lhs = sum(self.A[j, i] * model.n[j] for j in range(self.total_components))
+            rhs = sum(self.A[j, i] * initial[j] for j in range(self.total_components))
+            model.element_balance.add(pyo.inequality(-tolerance, lhs - rhs, tolerance))
 
         solver = pyo.SolverFactory('ipopt')
         solver.options['tol'] = 1e-8
+        solver.options['max_iter'] = 5000
+        solver.options['acceptable_tol'] = 1e-6
+        solver.options['acceptable_obj_change_tol'] = 1e-6
         results = solver.solve(model, tee=False)
 
         if results.solver.termination_condition == pyo.TerminationCondition.optimal:
