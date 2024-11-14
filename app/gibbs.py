@@ -48,7 +48,7 @@ class Gibbs:
         return tuple(bnds_aux)
 
     def solve_gibbs(self, initial, T, P, progress_callback=None):
-        initial[initial == 0] = 0.00001  # Evita zeros
+        initial[initial == 0] = 0.00001
         bnds = self.bnds_values(initial)
         model = pyo.ConcreteModel()
         model.n = pyo.Var(range(self.total_components), domain=pyo.NonNegativeReals, bounds=lambda m, i: bnds[i])
@@ -82,8 +82,6 @@ class Gibbs:
             return total_gibbs
 
         model.obj = pyo.Objective(rule=gibbs_rule, sense=pyo.minimize)
-
-        # Adiciona restrições de balanço sem lambdas aninhados
         model.element_balance = pyo.ConstraintList()
         for i in range(self.total_species):
             tolerance = 1e-8
