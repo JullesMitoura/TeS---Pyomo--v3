@@ -5,12 +5,15 @@ import matplotlib.pyplot as plt
 def linear_graph_maxs(dataframe, label1, label2, value1, value2, components, selected_components, name_colum, graph_type):
     filtered_data = dataframe[(dataframe[label1] == value1) & (dataframe[label2] == value2)]
 
-    colors_list = [
-        'lightseagreen', 'darkblue', 'salmon', 'tan', 'steelblue', 'dimgrey',
-        'cornflowerblue', '#900C3F', '#581845', '#DAF7A6', '#FFC300',
-        '#FF5733', '#8D6E63', '#1E88E5', '#43A047', '#7B1FA2', '#F57C00',
-        '#0288D1', '#43A047', '#8BC34A', '#9C27B0', '#4CAF50', '#607D8B', '#FF7043'
-    ]
+    colors_list = ['red',
+                    'green',
+                    'royalblue',
+                    'goldenrod',
+                    'coral',
+                    'blue',
+                    'indigo']
+    
+    line_styles = ['-', '--', ':']
 
     fig1, ax1 = plt.subplots(figsize=(8, 4))
 
@@ -27,7 +30,10 @@ def linear_graph_maxs(dataframe, label1, label2, value1, value2, components, sel
     for idx, component in enumerate(components):
         if component in filtered_data.columns:
             y = filtered_data[component]
-            ax1.plot(x, y, label=component, color=colors_list[idx % len(colors_list)])
+            color = colors_list[idx % len(colors_list)]
+            line_style = line_styles[(idx // len(colors_list)) % len(line_styles)]
+            ax1.plot(x, y, label=component, color=color, linestyle=line_style)
+
     ax1.set_xlabel(x_label)
     ax1.set_ylabel('Mols')
     ax1.grid(True)
@@ -53,7 +59,10 @@ def linear_graph_maxs(dataframe, label1, label2, value1, value2, components, sel
         for idx, component in enumerate(selected_components):
             if component in normalized_data.columns:
                 y = normalized_data[component]
-                ax2.plot(x, y, label=f"{component}", color=colors_list[idx % len(colors_list)])
+                color = colors_list[idx % len(colors_list)]
+                line_style = line_styles[(idx // len(colors_list)) % len(line_styles)]
+                ax2.plot(x, y, label=f"{component}", color=color, linestyle=line_style)
+
         ax2.set_xlabel(x_label)
         ax2.set_ylabel('Molar Fraction')
         ax2.grid(True)

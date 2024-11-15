@@ -68,7 +68,7 @@ class Entropy:
             n_sum = sum(model.n[i] for i in range(total_components))
 
             # Calcula o potencial químico para gases
-            mi_gas = [
+            entropy_i = [
                 ((deltaH[i] - deltaG[i]) / T0) 
                 - R * pyo.log(P) 
                 - R * pyo.log((model.n[gases[i]] / (n_sum + 1e-8)))
@@ -78,7 +78,7 @@ class Entropy:
 
             # Calcula a entropia total com um termo de regularização
             regularization_term = 1e-6
-            entropy = sum(mi_gas[i] * model.n[gases[i]] for i in range(len(mi_gas))) + regularization_term
+            entropy = sum(entropy_i[i] * model.n[gases[i]] for i in range(len(entropy_i))) + regularization_term
             return -entropy
 
         model.obj = pyo.Objective(rule=entropy_rule, sense=pyo.minimize)
