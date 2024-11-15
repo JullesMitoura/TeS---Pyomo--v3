@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QLabel, QPushButto
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QStandardItemModel
 from app.graphs import plot_superficie
-from app.graphs import linear_graph
+from app.graphs import linear_graph_maxs
 from app.graphs import plot_correlation_matrix
 
 class CheckableComboBox(QComboBox):
@@ -215,7 +215,7 @@ class Section3(QFrame):
 
         selected_components = self.component_combobox.getCheckedItems()
         
-        linear_graph(dataframe=dataframe, label1=label1, label2=label2, value1=value1, value2=value2, components=components, selected_components=selected_components, name_colum=name_colum, graph_type = graph_type)
+        linear_graph_maxs(dataframe=dataframe, label1=label1, label2=label2, value1=value1, value2=value2, components=components, selected_components=selected_components, name_colum=name_colum, graph_type = graph_type)
 
     def plot_correlation(self, dataframe):
         plot_correlation_matrix(df = dataframe)
