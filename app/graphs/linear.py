@@ -45,12 +45,12 @@ def linear_graph(dataframe, label1, label2, value1, value2, components, selected
         ax1.grid(True)
 
     elif graph_type == "T":
-        x = filtered_data['Temperature']
+        x = filtered_data['Initial Temperature']
         for idx, component in enumerate(components):
             if component in filtered_data.columns:
                 y = filtered_data[component]
                 ax1.plot(x, y, label=component, color=colors_list[idx % len(colors_list)])  # Use color from the list
-        ax1.set_xlabel('Temperature')
+        ax1.set_xlabel('Initial Temperature')
         ax1.set_ylabel('Mols')
         ax1.grid(True)
 
@@ -71,7 +71,7 @@ def linear_graph(dataframe, label1, label2, value1, value2, components, selected
             label = name_colum
             x = filtered_data[label]
         elif graph_type == "T":
-            label = 'Temperature'
+            label = 'Initial Temperature'
             x = filtered_data[label]
         elif graph_type == "P":
             label = 'Pressure'
