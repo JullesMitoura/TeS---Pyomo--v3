@@ -5,3 +5,4 @@ pyomo
 seaborn
 matplotlib
 PyQt6
+openpyxl

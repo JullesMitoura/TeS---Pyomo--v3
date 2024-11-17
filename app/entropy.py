@@ -1,9 +1,8 @@
 import pyomo.environ as pyo
 import numpy as np
-from app.aux.gibbsZero import gibbs_pad
-from app.aux.eos import fug
+from app.aux.entropyAux import int_cp_T, enthalpy_T
 
-class Gibbs:
+class Entropy:
     def __init__(self, data, species, components, inhibited_component, equation='Ideal Gas'):
         self.data = data
         self.species = species
@@ -46,57 +45,63 @@ class Gibbs:
                 bnds_aux.append((1e-8, max(upper_bound, epsilon)))
 
         return tuple(bnds_aux)
-
-    def solve_gibbs(self, initial, T, P, progress_callback=None):
-        initial[initial == 0] = 0.00001
+    
+    def solve_entropy(self, initial, Tinit, P):
         bnds = self.bnds_values(initial)
-        model = pyo.ConcreteModel()
-        model.n = pyo.Var(range(self.total_components), domain=pyo.NonNegativeReals, bounds=lambda m, i: bnds[i])
+        total_components = len(self.components)
 
-        solids = self.identify_phases('s')
+        model = pyo.ConcreteModel()
+        model.n = pyo.Var(range(total_components), domain=pyo.NonNegativeReals, bounds=lambda m, i: bnds[i])
+        model.T = pyo.Var(domain=pyo.NonNegativeReals, initialize=Tinit)
+
         gases = self.identify_phases('g')
 
-        def gibbs_rule(model):
-            R = 8.314  # J/mol·K
-            df_pad = gibbs_pad(T, self.data)
-            phii = fug(T=T, P=P, eq=self.equation, n=model.n, components=self.data)
+        # Define a função objetivo de entropia
+        def entropy_rule(model):
+            T0 = 298.15  # Temperatura de referência em K
+            R = 8.314    # Constante universal dos gases em J/mol·K
 
-            if isinstance(phii, (int, float)):  
-                phii = [phii] * self.total_components
+            int_cp_T_values, deltaH, deltaG = int_cp_T(model.T, self.data)
+            n_sum = sum(model.n[i] for i in range(total_components))
 
-            mi_gas = [
-                df_pad[i] + R * T * (
-                    pyo.log(phii[i]) + 
-                    pyo.log(model.n[i] / sum(model.n[j] for j in range(self.total_components))) + 
-                    pyo.log(P)
-                ) for i in gases
+            # Calcula o potencial químico para gases
+            entropy_i = [
+                ((deltaH[i] - deltaG[i]) / T0) 
+                - R * pyo.log(P) 
+                - R * pyo.log((model.n[gases[i]] / (n_sum + 1e-8)))
+                + int_cp_T_values[i]
+                for i in range(len(gases))
             ]
 
-            mi_solids = [df_pad[i] for i in solids]
-
             regularization_term = 1e-6
-            total_gibbs = sum(mi_gas[i] * model.n[gases[i]] for i in range(len(mi_gas))) + \
-                        sum(mi_solids[i] * model.n[solids[i]] for i in range(len(mi_solids))) + \
-                        regularization_term
-            
-            return total_gibbs
+            entropy = sum(entropy_i[i] * model.n[gases[i]] for i in range(len(entropy_i))) + regularization_term
+            return -entropy
 
-        model.obj = pyo.Objective(rule=gibbs_rule, sense=pyo.minimize)
+        model.obj = pyo.Objective(rule=entropy_rule, sense=pyo.minimize)
+
         model.element_balance = pyo.ConstraintList()
         for i in range(self.total_species):
-            tolerance = 1e-8
-            lhs = sum(self.A[j, i] * model.n[j] for j in range(self.total_components))
-            rhs = sum(self.A[j, i] * initial[j] for j in range(self.total_components))
+            tolerance = 1e-6
+            lhs = sum(self.A[j, i] * model.n[j] for j in range(total_components))
+            rhs = sum(self.A[j, i] * initial[j] for j in range(total_components))
             model.element_balance.add(pyo.inequality(-tolerance, lhs - rhs, tolerance))
 
+        enthalpy_exprs_final = enthalpy_T(model.T, self.data)
+        enthalpy_exprs_initial= enthalpy_T(Tinit, self.data)
+        initial_enthalpy_sum = sum(initial[j] * enthalpy_exprs_initial[j] for j in range(total_components))
+        final_enthalpy_sum = sum(model.n[j] * enthalpy_exprs_final[j] for j in range(total_components))
+
+        tolerance = 1e-6
+        model.enthalpy_balance = pyo.Constraint(
+            expr=pyo.inequality(-tolerance, final_enthalpy_sum - initial_enthalpy_sum, tolerance)
+        )
+
         solver = pyo.SolverFactory('ipopt')
-        solver.options['tol'] = 1e-8
-        solver.options['max_iter'] = 5000
-        solver.options['acceptable_tol'] = 1e-6
-        solver.options['acceptable_obj_change_tol'] = 1e-6
         results = solver.solve(model, tee=False)
 
         if results.solver.termination_condition == pyo.TerminationCondition.optimal:
-            return [pyo.value(model.n[i]) for i in range(self.total_components)]
+            res = [pyo.value(model.n[i]) for i in range(total_components)]
+            Teq = pyo.value(model.T)
+            return res, Teq
         else:
             raise Exception("Optimal solution not found.")

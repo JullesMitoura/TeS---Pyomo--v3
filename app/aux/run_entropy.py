@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-from app.gibbs import Gibbs
+from app.entropy import Entropy
 
-class RunGibbs():
+class RunEntropy():
     def __init__(self, data, species, initial, components, Tmin, Tmax, Pmin, Pmax, nT, nP, 
                  reference_componente=None, reference_componente_min=None, reference_componente_max=None, n_reference_componente=None, inhibit_component=None,
                  state_equation='Ideal Gas'):
@@ -42,12 +42,11 @@ class RunGibbs():
 
         return T, P, n, reference_index
     
-    def run_gibbs(self):
-        gibbs = Gibbs(self.data, self.species, self.components, self.inhibit_component, self.state_equation)
+    def run_entropy(self):
+        gibbs = Entropy(self.data, self.species, self.components, self.inhibit_component, self.state_equation)
         T_vals, P_vals, n_vals, reference_index = self.format_data()
         results = pd.DataFrame(columns=self.components)
 
-        # Lista para acumular os dicionários de resultados
         result_list = []
 
         for T in T_vals:
@@ -56,16 +55,17 @@ class RunGibbs():
                     for n in n_vals:
                         initial_copy = self.initial.astype(float).copy()
                         initial_copy[reference_index] = n
-                        result = gibbs.solve_gibbs(initial_copy, T, P)
+                        result, Teq = gibbs.solve_entropy(initial_copy, T, P)
 
                         result_dict = {comp: round(val, 3) for comp, val in zip(self.components, result)}
                         result_dict[self.components[reference_index] + ' Initial'] = n
-                        result_dict.update({'Temperature': T, 'Pressure': P})
+                        result_dict['Equilibrium Temperature (K)'] = Teq
+                        result_dict.update({'Initial Temperature': T, 'Pressure': P})
                         result_list.append(result_dict)
                 else:
-                    result = gibbs.solve_gibbs(self.initial, T, P)
+                    result, Teq = gibbs.solve_entropy(self.initial, T, P)
                     result_dict = {comp: round(val, 3) for comp, val in zip(self.components, result)}
-                    result_dict.update({'Temperature': T, 'Pressure': P})
+                    result_dict.update({'Initial Temperature': T, 'Pressure': P})
                     
                     result_list.append(result_dict)
 

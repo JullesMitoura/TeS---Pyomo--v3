@@ -155,14 +155,12 @@ class MinG(QWidget):
             QMessageBox.information(self, "Simulation Complete", "The Gibbs simulation has been successfully completed!")
             self.show_section3(self.results, self.components, self.reference_componente)
 
-            # Verifica se a section4 já existe e a remove
             if self.section4 is not None:
                 for i in reversed(range(self.section4_container.layout().count())): 
                     widget = self.section4_container.layout().itemAt(i).widget()
                     if widget is not None: 
                         widget.deleteLater()
 
-            # Cria e adiciona a nova section4
             self.section4 = Section4(self.results, self.components)
             self.section4_container.layout().addWidget(self.section4)
             self.section4.setVisible(True)
