@@ -50,12 +50,10 @@ class Entropy:
         bnds = self.bnds_values(initial)
         total_components = len(self.components)
 
-        # Define o modelo Pyomo
         model = pyo.ConcreteModel()
         model.n = pyo.Var(range(total_components), domain=pyo.NonNegativeReals, bounds=lambda m, i: bnds[i])
         model.T = pyo.Var(domain=pyo.NonNegativeReals, initialize=Tinit)
 
-        # Identifica componentes gasosos
         gases = self.identify_phases('g')
 
         # Define a função objetivo de entropia
@@ -63,7 +61,6 @@ class Entropy:
             T0 = 298.15  # Temperatura de referência em K
             R = 8.314    # Constante universal dos gases em J/mol·K
 
-            # Calcula entalpia integrada, delta H e delta G
             int_cp_T_values, deltaH, deltaG = int_cp_T(model.T, self.data)
             n_sum = sum(model.n[i] for i in range(total_components))
 
@@ -76,14 +73,12 @@ class Entropy:
                 for i in range(len(gases))
             ]
 
-            # Calcula a entropia total com um termo de regularização
             regularization_term = 1e-6
             entropy = sum(entropy_i[i] * model.n[gases[i]] for i in range(len(entropy_i))) + regularization_term
             return -entropy
 
         model.obj = pyo.Objective(rule=entropy_rule, sense=pyo.minimize)
 
-        # Restrições de balanço de elementos
         model.element_balance = pyo.ConstraintList()
         for i in range(self.total_species):
             tolerance = 1e-6
