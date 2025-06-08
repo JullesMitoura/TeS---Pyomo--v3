@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 *.pyo
 app/solver/**
+tes.spec
+hook-pyomo.py
+ico.ico
