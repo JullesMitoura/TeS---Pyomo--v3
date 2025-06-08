@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QLabel, QPushButton, QComboBox
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QGridLayout, QLabel, QPushButton, QComboBox, QMessageBox
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QStandardItemModel
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
 from app.graphs import plot_superficie
 from app.graphs import linear_graph
 from app.graphs import plot_correlation_matrix
@@ -19,12 +19,13 @@ class CheckableComboBox(QComboBox):
         else:
             item.setCheckState(Qt.CheckState.Checked)
 
-    def addItem(self, item):
-        super(CheckableComboBox, self).addItem(item)
-        index = self.model().index(self.count() - 1, 0)
-        item = self.model().itemFromIndex(index)
+    # 2. Substitua o método addItem pelo código abaixo
+    def addItem(self, text):
+        item = QStandardItem(text)
         item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
         item.setCheckState(Qt.CheckState.Unchecked)
+        self.model().appendRow(item)
+
 
     def getCheckedItems(self):
         checkedItems = []
@@ -39,13 +40,19 @@ class CheckableComboBox(QComboBox):
             QComboBox {
                 border: 1px solid black;
                 border-radius: 5px;
+                padding: 1px 18px 1px 3px;
                 color: black;
+                background-color: white;
             }
+            QComboBox QAbstractItemView {
+                border: 1px solid darkgray;
+                color: black;
+                background-color: white;
+                selection-background-color: #0078d7;
+            }
+
             QComboBox::drop-down {
                 border-radius: 5px;
-            }
-            QComboBox::item {
-                color: black;
             }
         """)
 
@@ -53,6 +60,12 @@ class Section3(QFrame):
     def __init__(self, dataframe, components, reference_componente, parent=None):
         super().__init__(parent)
         self.setMaximumHeight(180)
+        self.setStyleSheet("""
+            QLabel {
+                color: black;
+                font-size: 10px;
+            }
+        """)
 
         section_layout = QVBoxLayout()
         grid_layout = QGridLayout()
@@ -156,14 +169,16 @@ class Section3(QFrame):
 
     def _add_labeled_combobox(self, layout, items, label_text, row, col):
         label = QLabel(label_text)
+        label.setStyleSheet("color: black; background-color: transparent; font-size: 10px;")
         layout.addWidget(label, row, col)
+        
         combobox = self._create_combobox(items, row, col + 1)
         layout.addWidget(combobox, row, col + 1)
-        return combobox  # Return the combobox so we can store it as an instance attribute
+        return combobox
 
     def _create_combobox(self, items, row, col):
         combobox = QComboBox()
-        combobox.addItems([str(item) for item in items])  # Converte cada item para string
+        combobox.addItems([str(item) for item in items])
         combobox.setMinimumWidth(100)
         self._set_combobox_style(combobox)
         return combobox
@@ -171,18 +186,24 @@ class Section3(QFrame):
     def _set_combobox_style(self, combobox):
         combobox.setStyleSheet("""
             QComboBox {
-                border: 1px solid black;
-                border-radius: 5px;
                 color: black;
-                text-align: center;
+                background-color: white;
+                border: 1px solid #555;
+                border-radius: 5px;
                 padding-left: 5px;
-                font-size: 10px
+                font-size: 10px;
             }
+
+            QComboBox QAbstractItemView {
+                color: black;
+                background-color: white;
+                border: 1px solid #999;
+                selection-background-color: #0078d7;
+                selection-color: white;
+            }
+
             QComboBox::drop-down {
                 border-radius: 5px;
-            }
-            QComboBox::item {
-                color: black;
             }
         """)
 
@@ -190,6 +211,18 @@ class Section3(QFrame):
         x_value = self.x_value_combobox.currentText()
         y_value = self.y_value_combobox.currentText()
         z_value = self.z_value_combobox.currentText()
+
+        if dataframe[x_value].nunique() < 5 or dataframe[y_value].nunique() < 5:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText("Pontos Insuficientes para Plotagem")
+            msg.setInformativeText(
+                "Parece que não foram simulados pontos suficientes para gerar uma "
+                "superfície de resposta. Realize uma simulação do tipo 5 x 5 x 5."
+            )
+            msg.setWindowTitle("Erro de Plotagem")
+            msg.exec()
+            return
         plot_superficie(dataframe, x_value, y_value, z_value)
 
     def plot_linear_graphs(self, dataframe, reference_componente, graph_type, components):
@@ -218,4 +251,16 @@ class Section3(QFrame):
         linear_graph(dataframe=dataframe, label1=label1, label2=label2, value1=value1, value2=value2, components=components, selected_components=selected_components, name_colum=name_colum, graph_type = graph_type)
 
     def plot_correlation(self, dataframe):
-        plot_correlation_matrix(df = dataframe)
+        numeric_df = dataframe.select_dtypes(include='number')
+        if len(numeric_df.columns) < 2:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText("Dados Insuficientes para Plotagem")
+            msg.setInformativeText(
+                "Não há colunas numéricas suficientes para gerar uma matriz de correlação. "
+                "São necessárias pelo menos duas variáveis numéricas."
+            )
+            msg.setWindowTitle("Erro de Plotagem")
+            msg.exec()
+            return
+        plot_correlation_matrix(df=dataframe)

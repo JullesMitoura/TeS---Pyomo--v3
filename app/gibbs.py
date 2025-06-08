@@ -1,7 +1,8 @@
 import pyomo.environ as pyo
 import numpy as np
-from app.aux.gibbsZero import gibbs_pad
-from app.aux.eos import fug
+from app.auxiliar_func.gibbsZero import gibbs_pad
+from app.auxiliar_func.eos import fug
+from app.auxiliar_func.get_solver import get_ipopt_solver
 
 class Gibbs:
     def __init__(self, data, species, components, inhibited_component, equation='Ideal Gas'):
@@ -89,11 +90,11 @@ class Gibbs:
             rhs = sum(self.A[j, i] * initial[j] for j in range(self.total_components))
             model.element_balance.add(pyo.inequality(-tolerance, lhs - rhs, tolerance))
 
-        solver = pyo.SolverFactory('ipopt')
+        # Solver
+        solver = get_ipopt_solver()
+
         solver.options['tol'] = 1e-8
         solver.options['max_iter'] = 5000
-        solver.options['acceptable_tol'] = 1e-6
-        solver.options['acceptable_obj_change_tol'] = 1e-6
         results = solver.solve(model, tee=False)
 
         if results.solver.termination_condition == pyo.TerminationCondition.optimal:
