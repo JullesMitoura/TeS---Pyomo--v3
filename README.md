@@ -164,8 +164,7 @@ Seleciona-se a maior raiz real positiva ($Z$) que representa a fase gás.
 Para cada componente ($i$):
 
 $$
-\ln \phi_i = \frac{b_i}{b_{\text{mix}}}(Z - 1) - \ln(Z - B) 
-- \frac{A}{B} \cdot \left( \frac{2 \sum_j y_j a_{ij}}{a_{\text{mix}}} - \frac{b_i}{b_{\text{mix}}} \right) \cdot f(Z, B)
+\ln \phi_i = \frac{b_i}{b_{\text{mix}}}(Z - 1) - \ln(Z - B) - \frac{A}{B} \cdot \left( \frac{2 \sum_j y_j a_{ij}}{a_{\text{mix}}} - \frac{b_i}{b_{\text{mix}}} \right) \cdot f(Z, B)
 $$
 
 Com:
@@ -269,7 +268,7 @@ $$
 \sum_{i=1}^{NC} n_i^g \cdot \bar{H}i^g(T) = \sum{i=1}^{NC} n_i^0 \cdot \bar{H}_i^g(T_0)
 $$
 
-A entalpia molar \bar{H}_i^g é calculada com base na temperatura:
+A entalpia molar $\bar{H}_i^g$ é calculada com base na temperatura:
 
 $$
 \bar{H}i^g(T) = \Delta H{f,i}^{298.15} + \int_{T_0}^{T} C_{p,i}(T) , dT
