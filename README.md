@@ -365,7 +365,7 @@ Dentro deste projeto, o solver deve ser apresentado no seguinte caminho:
     └── 📁solver
 ```
 
-Para download, utilize este endereço.
+Para download do solver, utilize este endereço.
 
 https://github.com/coin-or/Ipopt/releases
 
