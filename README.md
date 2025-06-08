@@ -316,16 +316,18 @@ Onde $P_{calc}$ é a pressão calculada pelo modelo e $P_{exp}$ é a pressão ex
 As **restrições** do problema garantem que as condições de equilíbrio termodinâmico sejam satisfeitas em cada ponto experimental:
 
 1.  **Igualdade de Fugacidade**: A restrição fundamental do ELV é aplicada para cada componente.
-    $$
-    \phi_i^L x_i = \phi_i^V y_i \quad \text{para } i=1,\ldots,NC
-    $$
+
+$$
+\phi_i^L x_i = \phi_i^V y_i \quad \text{para } i=1,\ldots,NC
+$$
 
 2.  **Validade da Equação de Estado**: A equação cúbica de estado (PR, SRK ou RK) deve ser resolvida e satisfeita para ambas as fases, líquida e vapor, determinando os fatores de compressibilidade ($Z_L$ e $Z_V$).
 
 3.  **Soma das Frações Molares**: A soma das frações molares na fase vapor deve ser igual a 1.
-    $$
-    \sum_{i=1}^{NC} y_i = 1
-    $$
+
+$$
+\sum_{i=1}^{NC} y_i = 1
+$$
 
 
 A rotina descrita aqui pode ser encontrada no seguinte camiho:
