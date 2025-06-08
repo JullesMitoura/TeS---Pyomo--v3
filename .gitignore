@@ -6,3 +6,4 @@ app/solver/**
 tes.spec
 hook-pyomo.py
 ico.ico
+.DS_Store
