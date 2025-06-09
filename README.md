@@ -370,3 +370,17 @@ Para download do solver, utilize este endereço.
 https://github.com/coin-or/Ipopt/releases
 
 ---
+
+
+## Processo para gerar executavel:
+
+Utilizaremos o `pyinstaller`para gerar o executavel. Caso não possua o mesmo instalado, utilize o seguinte comando:
+```
+pip install pyinstaller
+```
+
+Note que existe um arquivo chamado `tes.spec`, este contem as especificações da aplicação. O file `hook-pyomo.py`é utilizado para resolver um problema durante o empacotamento do pyomo. Para gerar o executavel, use:
+
+```
+pyinstaller tes.spec
+```

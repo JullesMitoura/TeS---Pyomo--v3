@@ -10,6 +10,7 @@ from app.auxiliar_func.read_data import ReadData
 from app.auxiliar_func.run_entropy import RunEntropy
 from app.screens.entropy_aux.section03 import Section3
 from app.screens.entropy_aux.section04 import Section4
+from app.find_path import resource_path
 
 class MaxS(QWidget):
     def __init__(self):
@@ -298,7 +299,7 @@ class MaxS(QWidget):
 
         column3_layout = QVBoxLayout()
         image_label = QLabel()
-        pixmap = QPixmap("./app/imgs/maxS.png")
+        pixmap = QPixmap(resource_path("app/imgs/maxS.png"))
         image_label.setPixmap(pixmap.scaled(150, 130, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         column3_layout.addWidget(image_label, alignment=Qt.AlignmentFlag.AlignCenter)
 

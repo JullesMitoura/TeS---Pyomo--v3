@@ -10,6 +10,7 @@ from app.auxiliar_func.read_data import ReadData
 from app.auxiliar_func.run_gibbs import RunGibbs
 from app.screens.ming_aux.section03 import Section3
 from app.screens.ming_aux.section04 import Section4
+from app.find_path import resource_path
 
 class MinG(QWidget):
     def __init__(self):
@@ -298,7 +299,7 @@ class MinG(QWidget):
 
         column3_layout = QVBoxLayout()
         image_label = QLabel()
-        pixmap = QPixmap("./app/imgs/minG.png")
+        pixmap = QPixmap(resource_path("app/imgs/minG.png"))
         image_label.setPixmap(pixmap.scaled(150, 130, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         column3_layout.addWidget(image_label, alignment=Qt.AlignmentFlag.AlignCenter)
 

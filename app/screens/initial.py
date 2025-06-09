@@ -20,7 +20,7 @@ class InitialScreen(QWidget):
         layout = QVBoxLayout()
 
         image_label = QLabel()
-        pixmap = QPixmap("./app/imgs/initial_v3.png")
+        pixmap = QPixmap(resource_path("app/imgs/initial_v3.png"))
         scaled_pixmap = pixmap.scaled(700, 800, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         image_label.setPixmap(scaled_pixmap)
         image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
