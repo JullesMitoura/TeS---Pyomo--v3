@@ -5,7 +5,7 @@ from app.auxiliar_func.eos import fug
 from app.auxiliar_func.get_solver import get_ipopt_solver
 
 class Gibbs:
-    def __init__(self, data, species, components, inhibited_component, equation='Ideal Gas'):
+    def __init__(self, data, species, components, inhibited_component,kij, equation='Ideal Gas'):
         self.data = data
         self.species = species
         self.components = components
@@ -14,6 +14,8 @@ class Gibbs:
         self.A = np.array([[component[specie] for specie in species] for component in data.values()])
         self.inhibited_component = inhibited_component
         self.equation = equation
+        self.kij = kij
+
 
     def identify_phases(self, phase_type):
         """
@@ -60,7 +62,7 @@ class Gibbs:
         def gibbs_rule(model):
             R = 8.314  # J/mol·K
             df_pad = gibbs_pad(T, self.data)
-            phii = fug(T=T, P=P, eq=self.equation, n=model.n, components=self.data)
+            phii = fug(T=T, P=P, eq=self.equation, n=model.n, components=self.data, kij_df=self.kij)
 
             if isinstance(phii, (int, float)):  
                 phii = [phii] * self.total_components

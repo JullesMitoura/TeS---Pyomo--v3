@@ -425,7 +425,7 @@ class MaxS(QWidget):
 
         grid_layout.addWidget(QLabel("State Equation:"), 3, 2)
         self.state_equation_combobox = QComboBox()
-        self.state_equation_combobox.addItems(['Ideal Gas', 'Peng-Robinson', 'Soave Redlich Kwong', 'Redlich Kwong'])
+        self.state_equation_combobox.addItems(['Ideal Gas', 'Peng-Robinson', 'Soave-Redlich-Kwong', 'Redlich-Kwong', 'Virial'])
         self.state_equation_combobox.setStyleSheet("""
             QComboBox {
                 border: 1px solid black; border-radius: 5px; color: black;

@@ -147,10 +147,10 @@ class MinG(QWidget):
             gibbs = RunGibbs(data=self.data, species=self.species, initial=self.initial, 
                             components=self.components, Tmin=self.tmin, Tmax=self.tmax,
                             Pmin=self.pmin, Pmax=self.pmax, nT=self.n_temperature, nP=self.n_pressure, 
+                            kij=self.kij,
                             reference_componente=self.reference_componente, reference_componente_min=self.reference_componente_min, 
                             reference_componente_max=self.reference_componente_max, n_reference_componente=self.n_component_values, 
                             inhibit_component=self.inhibit_component, state_equation=self.state_equation)
-            
             self.results = gibbs.run_gibbs()
 
             msg_box = QMessageBox(self)
@@ -312,25 +312,43 @@ class MinG(QWidget):
 
     def open_file_dialog(self):
         file_name, _ = QFileDialog.getOpenFileName(
-            self, 
-            "Open File", 
-            "", 
-            "CSV Files (*.csv);;Excel Files (*.xlsx; *.xls);;Text Files (*.txt);;All Files (*)"
+            self, "Open File", "", 
+            "Excel Files (*.xlsx *.xls);;CSV Files (*.csv);;Text Files (*.txt);;All Files (*)"
         )
         if file_name:
-            self.file_path = file_name
-            self.document = ReadData(file_name)
-            self.dataframe = self.document.data
-            self.data, self.species, self.initial, self.components = self.document.get_infos()
-            self.populate_table()
-            
-            self.component_combobox.addItem("---")
-            self.component_combobox.addItems(self.components)
-            self.inhibit_component_combox.addItem("---")
-            self.inhibit_component_combox.addItems(self.components)
-            self.component_combobox.setEnabled(True)
-            self.inhibit_component_combox.setEnabled(True)
-            self.state_equation_combobox.setEnabled(True)
+            try:
+                ### MODIFICADO: Lógica de carregamento de dados centralizada e eficiente ###
+                
+                # 1. Cria a instância de ReadData. O __init__ já lê tudo.
+                self.document = ReadData(file_name)
+                
+                # 2. Atribui os resultados diretamente dos atributos do objeto.
+                # Nota: Assumindo que ReadData tem um atributo 'dataframe' para a tabela.
+                self.dataframe = self.document.dataframe # Para a tabela da UI
+                self.data = self.document.data           # Dicionário para os cálculos
+                self.species = self.document.species
+                self.initial = self.document.initial
+                self.components = self.document.components
+                self.kij = self.document.kij             # A matriz Kij é carregada aqui!
+
+                # 3. Atualiza a UI com os dados carregados
+                self.file_path = file_name
+                self.populate_table()
+                
+                self.component_combobox.clear()
+                self.component_combobox.addItem("---")
+                self.component_combobox.addItems(self.components)
+                
+                self.inhibit_component_combox.clear()
+                self.inhibit_component_combox.addItem("---")
+                self.inhibit_component_combox.addItems(self.components)
+
+                self.component_combobox.setEnabled(True)
+                self.inhibit_component_combox.setEnabled(True)
+                self.state_equation_combobox.setEnabled(True)
+
+            except (FileNotFoundError, ValueError, KeyError) as e:
+                QMessageBox.critical(self, "File Error", f"Failed to read or process the file:\n{e}")
 
     def populate_table(self):
         self.table.setRowCount(len(self.dataframe))
@@ -425,7 +443,7 @@ class MinG(QWidget):
 
         grid_layout.addWidget(QLabel("State Equation:"), 3, 2)
         self.state_equation_combobox = QComboBox()
-        self.state_equation_combobox.addItems(['Ideal Gas', 'Peng-Robinson', 'Soave Redlich Kwong', 'Redlich Kwong'])
+        self.state_equation_combobox.addItems(['Ideal Gas', 'Peng-Robinson', 'Soave-Redlich-Kwong', 'Redlich-Kwong', 'Virial'])
         self.state_equation_combobox.setStyleSheet("""
             QComboBox {
                 border: 1px solid black; border-radius: 5px; color: black;

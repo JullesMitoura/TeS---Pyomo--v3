@@ -3,7 +3,8 @@ import numpy as np
 from app.gibbs import Gibbs
 
 class RunGibbs():
-    def __init__(self, data, species, initial, components, Tmin, Tmax, Pmin, Pmax, nT, nP, 
+    def __init__(self, data, species, initial, components, Tmin, Tmax, Pmin, Pmax, nT, nP,
+                 kij,
                  reference_componente=None, reference_componente_min=None, reference_componente_max=None, n_reference_componente=None, inhibit_component=None,
                  state_equation='Ideal Gas'):
         self.data = data
@@ -22,6 +23,7 @@ class RunGibbs():
         self.reference_componente_max = reference_componente_max
         self.n_reference_componente = n_reference_componente
         self.state_equation = state_equation
+        self.kij = kij
 
     def format_data(self):
         if self.reference_componente is not None and self.reference_componente != '---':
@@ -43,7 +45,8 @@ class RunGibbs():
         return T, P, n, reference_index
     
     def run_gibbs(self):
-        gibbs = Gibbs(self.data, self.species, self.components, self.inhibit_component, self.state_equation)
+
+        gibbs = Gibbs(self.data, self.species, self.components, self.inhibit_component, self.kij, self.state_equation)
         T_vals, P_vals, n_vals, reference_index = self.format_data()
         results = pd.DataFrame(columns=self.components)
 
