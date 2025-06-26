@@ -1,11 +1,10 @@
-.venv
+.venv/
 __pycache__/
 *.pyc
 *.pyo
-app/solver/**
-build/**
-dist/**
-tes.spec
-hook-pyomo.py
+app/solver/*
+!app/solver/README.txt
+build/
+dist/
 ico.ico
 .DS_Store
