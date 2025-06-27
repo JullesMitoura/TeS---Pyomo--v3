@@ -215,8 +215,11 @@ $$
 Onde $n_i^g$ é o número de mols do componente i na fase gasosa e $\bar{S}_i^g$ é a entropia molar desse componente.
 
 O cálculo da entropia molar dos gases considera:
+
 	•	Contribuições entrópicas padrão a 298.15 K;
+
 	•	Variações com a temperatura via capacidades caloríficas;
+
 	•	Termos relacionados à composição e pressão do sistema.
 
 A expressão geral adotada para a entropia molar é:
@@ -292,7 +295,7 @@ Em todos os módulos de simulação deste projeto — minimização de energia d
 
 A escolha do IPOPT para o TeS v3 não foi acidental e se baseia em vários motivos técnicos fundamentais:
 
-1.  **Natureza do Problema Termodinâmico**: Os problemas de equilíbrio químico e de fases são inerentemente não-lineares. As funções objetivo (como a energia de Gibbs ou a entropia) e as restrições (como a igualdade de fugacidade) dependem de logaritmos de frações molares ($ln(y_i)$), equações de estado cúbicas e outras relações complexas, que não podem ser resolvidas com métodos de programação linear. IPOPT é especializado para esta classe de problemas.
+1.  **Natureza do Problema Termodinâmico**: Os problemas de equilíbrio químico e de fases são inerentemente não-lineares. As funções objetivo (como a energia de Gibbs ou a entropia) e as restrições (como a igualdade de fugacidade) dependem de logaritmos de frações molares ($ ln(y_i) $), equações de estado cúbicas e outras relações complexas, que não podem ser resolvidas com métodos de programação linear. IPOPT é especializado para esta classe de problemas.
 
 2.  **Tratamento Robusto de Restrições**: O IPOPT utiliza um **método de pontos interiores (ou método de barreira)**, que é extremamente eficaz no tratamento de problemas com restrições de igualdade (ex: balanço atômico, balanço de energia, igualdade de fugacidade) e de desigualdade (ex: não-negatividade do número de mols, $n_i \ge 0$). Ele aborda a solução ótima a partir do interior da região viável, o que o torna robusto para os tipos de restrições encontrados em termodinâmica.
 

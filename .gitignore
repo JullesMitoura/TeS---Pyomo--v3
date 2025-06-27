@@ -6,5 +6,4 @@ app/solver/*
 !app/solver/README.txt
 build/
 dist/
-ico.ico
 .DS_Store
