@@ -2,12 +2,12 @@ import numpy as np
 import pandas as pd
 import pyomo.environ as pyo
 
-def fug(T, 
-        P, 
-        eq, 
-        n, 
-        components,
-        kij_df: pd.DataFrame):
+def fug(T,                          # Temperature K
+        P,                          # Pressure bar
+        eq,                         # Name of equation to calculate phi(L,V)
+        n,                          # Molar fraction of components
+        components,                 # Thermodynamic data about components
+        kij_df: pd.DataFrame):      # Dataframe with kij parameters
     
     R = 8.314462    # Constante universal dos gases em J/(mol*K) ou Pa*m^3/(mol*K)
     P_pa = P * 1e5  # Converte pressão de bar para Pa
