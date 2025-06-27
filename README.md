@@ -144,15 +144,11 @@ Os coeficientes dependem da EOS:
 
 * **Peng-Robinson (PR):**
 
-    $$
-    Z^3 + (B - 1)Z^2 + (A - 2B - 3B^2)Z + (-AB + B^2 + B^3) = 0
-    $$
+    $$Z^3 + (B - 1)Z^2 + (A - 2B - 3B^2)Z + (-AB + B^2 + B^3) = 0$$
 
 * **SRK / RK:**
 
-    $$
-    Z^3 - Z^2 + (A - B - B^2)Z - AB = 0
-    $$
+    $$Z^3 - Z^2 + (A - B - B^2)Z - AB = 0$$
 
 Seleciona-se a maior raiz real positiva ($Z$) que representa a fase gás.
 
@@ -164,15 +160,11 @@ Com:
 
 * Para PR:
 
-    $$
-    f(Z, B) = \frac{1}{2\sqrt{2}} \cdot \ln\left( \frac{Z + (1 + \sqrt{2})B}{Z + (1 - \sqrt{2})B} \right)
-    $$
+    $$f(Z, B) = \frac{1}{2\sqrt{2}} \cdot \ln\left( \frac{Z + (1 + \sqrt{2})B}{Z + (1 - \sqrt{2})B} \right)$$
 
 * Para SRK/RK:
 
-    $$
-    f(Z, B) = \ln\left(1 + \frac{B}{Z} \right)
-    $$
+    $$f(Z, B) = \ln\left(1 + \frac{B}{Z} \right)$$
 
 ##### **Equação de Virial (2º Termo)**
 
