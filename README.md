@@ -46,6 +46,7 @@ Para gases não ideais, o cálculo dos coeficientes de fugacidade é feito com b
 - Peng-Robinson (PR)
 - Soave-Redlich-Kwong (SRK)
 - Redlich-Kwong (RK)
+- Virial (Truncada no segundo termo)
 
 Os detalhes serão apresentados na seção 1.1 deste texto.
 
