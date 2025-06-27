@@ -115,7 +115,38 @@ class Section4(QFrame):
                     self.original_data.to_csv(file_name, index=False)
                 elif file_name.endswith('.xlsx'):
                     self.original_data.to_excel(file_name, index=False)
-
-                QMessageBox.information(self, "Success", "Results saved successfully!")
+                
+                msg_box = QMessageBox(self)
+                msg_box.setIcon(QMessageBox.Icon.Information)
+                msg_box.setWindowTitle("Success")
+                msg_box.setText("Results saved successfully!")
+                msg_box.setStyleSheet("""
+                    QLabel { 
+                        color: black; 
+                    }
+                    QPushButton { 
+                        color: black;
+                        background-color: #E1E1E1;
+                        border: 1px solid #ADADAD;
+                        padding: 5px 15px;
+                        border-radius: 3px;
+                    }
+                    QPushButton:hover { 
+                        background-color: #F0F0F0; 
+                    }
+                    QPushButton:pressed { 
+                        background-color: #C0C0C0; 
+                    }
+                """)
+                msg_box.exec()
         else:
-            QMessageBox.warning(self, "Error", "No data to save!")
+            msg_box_error = QMessageBox(self)
+            msg_box_error.setIcon(QMessageBox.Icon.Warning)
+            msg_box_error.setWindowTitle("Error")
+            msg_box_error.setText("No data to save!")
+            msg_box_error.setStyleSheet("""
+                QLabel { color: black; }
+                QPushButton { color: black; background-color: #E1E1E1; border: 1px solid #ADADAD; padding: 5px 15px; border-radius: 3px; }
+                QPushButton:hover { background-color: #F0F0F0; }
+            """)
+            msg_box_error.exec()

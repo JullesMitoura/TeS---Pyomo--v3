@@ -1,8 +1,8 @@
-numpy
-scipy
-pandas
-pyomo
-seaborn
-matplotlib
-PyQt6
-openpyxl
+numpy==2.3.0
+scipy==1.15.3
+pandas==2.3.0
+pyomo==6.9.2
+seaborn==0.13.2
+matplotlib==3.10.3
+PyQt6==6.9.1
+openpyxl==3.1.5

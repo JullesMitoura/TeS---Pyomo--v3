@@ -6,10 +6,11 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QPixmap, QFont
 from PyQt6.QtCore import Qt
-from app.aux.read_data import ReadData
-from app.aux.run_gibbs import RunGibbs
+from app.auxiliar_func.read_data import ReadData
+from app.auxiliar_func.run_gibbs import RunGibbs
 from app.screens.ming_aux.section03 import Section3
 from app.screens.ming_aux.section04 import Section4
+from app.find_path import resource_path
 
 class MinG(QWidget):
     def __init__(self):
@@ -146,13 +147,35 @@ class MinG(QWidget):
             gibbs = RunGibbs(data=self.data, species=self.species, initial=self.initial, 
                             components=self.components, Tmin=self.tmin, Tmax=self.tmax,
                             Pmin=self.pmin, Pmax=self.pmax, nT=self.n_temperature, nP=self.n_pressure, 
+                            kij=self.kij,
                             reference_componente=self.reference_componente, reference_componente_min=self.reference_componente_min, 
                             reference_componente_max=self.reference_componente_max, n_reference_componente=self.n_component_values, 
                             inhibit_component=self.inhibit_component, state_equation=self.state_equation)
-            
             self.results = gibbs.run_gibbs()
 
-            QMessageBox.information(self, "Simulation Complete", "The Gibbs simulation has been successfully completed!")
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Information)
+            msg_box.setWindowTitle("Simulation Complete")
+            msg_box.setText("The Gibbs simulation has been successfully completed!")
+            msg_box.setStyleSheet("""
+                                    QLabel { 
+                                        color: black; 
+                                    }
+                                    QPushButton { 
+                                        color: black;
+                                        background-color: #E1E1E1;
+                                        border: 1px solid #ADADAD;
+                                        padding: 5px 15px;
+                                        border-radius: 3px;
+                                    }
+                                    QPushButton:hover {
+                                        background-color: #F0F0F0;
+                                    }
+                                    QPushButton:pressed {
+                                        background-color: #C0C0C0;
+                                    }
+                                """)
+            msg_box.exec()
             self.show_section3(self.results, self.components, self.reference_componente)
 
             if self.section4 is not None:
@@ -242,11 +265,11 @@ class MinG(QWidget):
             QTableWidget {
                 border: 1px solid black;
                 background-color: #f5f5f5;
-                gridline-color: black;  /* Black grid lines */
-                font-size: 10px; /* Adjust font size here */
+                gridline-color: black;
+                font-size: 10px;
             }
             QTableWidget::item {
-                border: 1px solid black;  /* Black border for each cell */
+                border: 1px solid black;
                 padding: 5px;
                 color: #333;
             }
@@ -257,10 +280,10 @@ class MinG(QWidget):
             QHeaderView::section {
                 background-color: #3f51b5;
                 color: white;
-                border: 1px solid black;  /* Black border for header */
+                border: 1px solid black;
                 padding: 5px;
                 font-weight: bold;
-                font-size: 10px; /* Adjust font size here */
+                font-size: 10px;
             }
             QTableCornerButton::section {
                 background-color: #3f51b5;
@@ -276,7 +299,7 @@ class MinG(QWidget):
 
         column3_layout = QVBoxLayout()
         image_label = QLabel()
-        pixmap = QPixmap("./app/imgs/minG.png")
+        pixmap = QPixmap(resource_path("app/imgs/minG.png"))
         image_label.setPixmap(pixmap.scaled(150, 130, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
         column3_layout.addWidget(image_label, alignment=Qt.AlignmentFlag.AlignCenter)
 
@@ -289,25 +312,43 @@ class MinG(QWidget):
 
     def open_file_dialog(self):
         file_name, _ = QFileDialog.getOpenFileName(
-            self, 
-            "Open File", 
-            "", 
-            "CSV Files (*.csv);;Excel Files (*.xlsx; *.xls);;Text Files (*.txt);;All Files (*)"
+            self, "Open File", "", 
+            "Excel Files (*.xlsx *.xls);;CSV Files (*.csv);;Text Files (*.txt);;All Files (*)"
         )
         if file_name:
-            self.file_path = file_name
-            self.document = ReadData(file_name)
-            self.dataframe = self.document.data
-            self.data, self.species, self.initial, self.components = self.document.get_infos()
-            self.populate_table()
-            
-            self.component_combobox.addItem("---")
-            self.component_combobox.addItems(self.components)  # Adicione os componentes carregados
-            self.inhibit_component_combox.addItem("---")
-            self.inhibit_component_combox.addItems(self.components) # Adicione os componentes carregados
-            self.component_combobox.setEnabled(True)  # Ative a combobox do componente
-            self.inhibit_component_combox.setEnabled(True)
-            self.state_equation_combobox.setEnabled(True)
+            try:
+                ### MODIFICADO: Lógica de carregamento de dados centralizada e eficiente ###
+                
+                # 1. Cria a instância de ReadData. O __init__ já lê tudo.
+                self.document = ReadData(file_name)
+                
+                # 2. Atribui os resultados diretamente dos atributos do objeto.
+                # Nota: Assumindo que ReadData tem um atributo 'dataframe' para a tabela.
+                self.dataframe = self.document.dataframe # Para a tabela da UI
+                self.data = self.document.data           # Dicionário para os cálculos
+                self.species = self.document.species
+                self.initial = self.document.initial
+                self.components = self.document.components
+                self.kij = self.document.kij             # A matriz Kij é carregada aqui!
+
+                # 3. Atualiza a UI com os dados carregados
+                self.file_path = file_name
+                self.populate_table()
+                
+                self.component_combobox.clear()
+                self.component_combobox.addItem("---")
+                self.component_combobox.addItems(self.components)
+                
+                self.inhibit_component_combox.clear()
+                self.inhibit_component_combox.addItem("---")
+                self.inhibit_component_combox.addItems(self.components)
+
+                self.component_combobox.setEnabled(True)
+                self.inhibit_component_combox.setEnabled(True)
+                self.state_equation_combobox.setEnabled(True)
+
+            except (FileNotFoundError, ValueError, KeyError) as e:
+                QMessageBox.critical(self, "File Error", f"Failed to read or process the file:\n{e}")
 
     def populate_table(self):
         self.table.setRowCount(len(self.dataframe))
@@ -325,83 +366,95 @@ class MinG(QWidget):
         section_layout = QVBoxLayout()
         grid_layout = QGridLayout()
 
-        # Coluna 1
+        line_edit_style = """
+            QLineEdit {
+                color: black;
+                background-color: white;
+                border: 1px solid #555;
+                border-radius: 5px;
+                padding: 2px;
+            }
+        """
+
         grid_layout.addWidget(QLabel("Max. Temperature:"), 0, 0)
         self.max_temp_input = QLineEdit()
+        self.max_temp_input.setStyleSheet(line_edit_style)  # Aplica o estilo
         grid_layout.addWidget(self.max_temp_input, 0, 1)
 
         grid_layout.addWidget(QLabel("Min. Temperature:"), 1, 0)
         self.min_temp_input = QLineEdit()
+        self.min_temp_input.setStyleSheet(line_edit_style)  # Aplica o estilo
         grid_layout.addWidget(self.min_temp_input, 1, 1)
 
         grid_layout.addWidget(QLabel("Max. Pressure:"), 2, 0)
         self.max_pressure_input = QLineEdit()
+        self.max_pressure_input.setStyleSheet(line_edit_style)  # Aplica o estilo
         grid_layout.addWidget(self.max_pressure_input, 2, 1)
 
         grid_layout.addWidget(QLabel("Min. Pressure:"), 3, 0)
         self.min_pressure_input = QLineEdit()
+        self.min_pressure_input.setStyleSheet(line_edit_style)  # Aplica o estilo
         grid_layout.addWidget(self.min_pressure_input, 3, 1)
 
         grid_layout.addWidget(QLabel("Select a Component:"), 4, 0)
         self.component_combobox = QComboBox()
+
         self.component_combobox.setEnabled(False)
         self.component_combobox.setStyleSheet("""
-            QComboBox {
-                border: 1px solid black;
-                border-radius: 5px;
-                color: black;
-                text-align: center;
-                padding-left: 5px;
-                font-size: 12px
-            }
-            QComboBox::drop-down {
-                border-radius: 5px;
-            }
-            QComboBox::item {
-                color: black;  /* Cor do texto dos itens da lista */
-            }
+        QComboBox {
+            border: 1px solid black; border-radius: 5px; color: black;
+            background-color: white; padding-left: 5px; font-size: 12px;
+        }
+        QComboBox QAbstractItemView {
+            color: black; background-color: white;
+            selection-background-color: lightgray; selection-color: black;
+        }
+        QComboBox::drop-down { border-radius: 5px; }
+        QComboBox::item { color: black; }
         """)
         grid_layout.addWidget(self.component_combobox, 4, 1)
 
+
         grid_layout.addWidget(QLabel("Max. Value:"), 5, 0)
         self.max_value_input = QLineEdit()
+        self.max_value_input.setStyleSheet(line_edit_style)  # Aplica o estilo
         grid_layout.addWidget(self.max_value_input, 5, 1)
 
         grid_layout.addWidget(QLabel("Min. Value:"), 6, 0)
         self.min_value_input = QLineEdit()
+        self.min_value_input.setStyleSheet(line_edit_style)  # Aplica o estilo
         grid_layout.addWidget(self.min_value_input, 6, 1)
 
         # Coluna 3
         grid_layout.addWidget(QLabel("N. Values T:"), 0, 2)
         self.n_values_t_input = QLineEdit()
+        self.n_values_t_input.setStyleSheet(line_edit_style)  # Aplica o estilo
         grid_layout.addWidget(self.n_values_t_input, 0, 3)
 
         grid_layout.addWidget(QLabel("N. Values P:"), 1, 2)
         self.n_values_p_input = QLineEdit()
+        self.n_values_p_input.setStyleSheet(line_edit_style)  # Aplica o estilo
         grid_layout.addWidget(self.n_values_p_input, 1, 3)
 
         grid_layout.addWidget(QLabel("N. Values n:"), 2, 2)
         self.n_values_n_input = QLineEdit()
+        self.n_values_n_input.setStyleSheet(line_edit_style)  # Aplica o estilo
         grid_layout.addWidget(self.n_values_n_input, 2, 3)
 
         grid_layout.addWidget(QLabel("State Equation:"), 3, 2)
         self.state_equation_combobox = QComboBox()
-        self.state_equation_combobox.addItems(['Ideal Gas', 'Peng-Robinson', 'Soave Redlich Kwong', 'Redlich Kwong'])
+        self.state_equation_combobox.addItems(['Ideal Gas', 'Peng-Robinson', 'Soave-Redlich-Kwong', 'Redlich-Kwong', 'Virial'])
         self.state_equation_combobox.setStyleSheet("""
             QComboBox {
-                border: 1px solid black;
-                border-radius: 5px;
-                color: black;  /* Cor do texto */
-                text-align: center;
-                padding-left: 5px;
-                font-size: 12px
+                border: 1px solid black; border-radius: 5px; color: black;
+                background-color: white; padding-left: 5px; font-size: 12px;
             }
-            QComboBox::drop-down {
-                border-radius: 5px;
+            QComboBox QAbstractItemView {
+                color: black; background-color: white;
+                selection-background-color: lightgray; selection-color: black;
             }
-            QComboBox::item {
-                color: black;  /* Cor do texto dos itens da lista */
-            }
+            QComboBox::drop-down { border-radius: 5px; }
+            QComboBox::item { color: black; }
         """)
         grid_layout.addWidget(self.state_equation_combobox, 3, 3)
 
@@ -410,29 +463,24 @@ class MinG(QWidget):
         self.inhibit_component_combox.setEnabled(False)
         self.inhibit_component_combox.setStyleSheet("""
             QComboBox {
-                border: 1px solid black;
-                border-radius: 5px;
-                color: black;  /* Cor do texto */
-                text-align: center;
-                padding-left: 5px;
-                font-size: 12px
-                                                    
+                border: 1px solid black; border-radius: 5px; color: black;
+                background-color: white; padding-left: 5px; font-size: 12px;
             }
-            QComboBox::drop-down {
-                border-radius: 5px;
+            QComboBox QAbstractItemView {
+                color: black; background-color: white;
+                selection-background-color: lightgray; selection-color: black;
             }
-            QComboBox::item {
-                color: black;
-            }
+            QComboBox::drop-down { border-radius: 5px; }
+            QComboBox::item { color: black; }
         """)
         grid_layout.addWidget(self.inhibit_component_combox, 4, 3)
 
+
         section_layout.addLayout(grid_layout)
         section.setLayout(section_layout)
+
+        for i in range(grid_layout.count()):
+            widget = grid_layout.itemAt(i).widget()
+            if isinstance(widget, QLabel):
+                widget.setStyleSheet("color: black;")
         return section
-
-    def create_section3(self):
-        return
-
-    def create_section4(self):
-        return

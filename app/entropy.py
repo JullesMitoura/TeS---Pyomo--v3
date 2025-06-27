@@ -1,6 +1,7 @@
 import pyomo.environ as pyo
 import numpy as np
-from app.aux.entropyAux import int_cp_T, enthalpy_T
+from app.auxiliar_func.entropyAux import int_cp_T, enthalpy_T
+from app.auxiliar_func.get_solver import get_ipopt_solver
 
 class Entropy:
     def __init__(self, data, species, components, inhibited_component, equation='Ideal Gas'):
@@ -96,7 +97,9 @@ class Entropy:
             expr=pyo.inequality(-tolerance, final_enthalpy_sum - initial_enthalpy_sum, tolerance)
         )
 
-        solver = pyo.SolverFactory('ipopt')
+        # Solver
+        solver = get_ipopt_solver()
+
         results = solver.solve(model, tee=False)
 
         if results.solver.termination_condition == pyo.TerminationCondition.optimal:

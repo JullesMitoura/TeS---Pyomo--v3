@@ -9,11 +9,13 @@ class Button:
     def css(cls):
         return """
             QPushButton {
+                color: black;
                 background-color: #f0f0f0;
                 border: 1px solid #ccc;
                 border-radius: 10px;
-                padding: 5px;
+                padding: 8px;
                 font-size: 12px;
+                font-weight: normal;
             }
             QPushButton:hover {
                 background-color: #d0d0d0;
@@ -23,7 +25,8 @@ class Button:
             }
             QPushButton:checked {
                 font-weight: bold;
-                background-color: #87CEEB;
+                background-color: #87CEEB; /* Azul claro para o botão ativo */
+                border: 1px solid #0078D7;
             }
         """
 

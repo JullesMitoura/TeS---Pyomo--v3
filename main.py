@@ -4,7 +4,7 @@ from PyQt6.QtGui import QFont
 from app.screens.initial import InitialScreen
 from app.screens.ming import MinG
 from app.screens.maxs import MaxS
-from app.screens.elv import ELVScreen
+# from app.screens.elv import ELVScreen
 from app.screens.buttons import Button
 
 class MainWindow(QMainWindow):
@@ -27,14 +27,17 @@ class MainWindow(QMainWindow):
         self.btn_initial = QPushButton("Initial")
         self.btn_ming = QPushButton("Gibbs Energy Minimization")
         self.btn_maxs = QPushButton("Entropy Maximization")
+        # self.btn_elv = QPushButton("ELV")
 
         self.btn_initial.setStyleSheet(button_manager.css())
         self.btn_ming.setStyleSheet(button_manager.css())
         self.btn_maxs.setStyleSheet(button_manager.css())
+        # self.btn_elv.setStyleSheet(button_manager.css())
 
         self.button_layout.addWidget(self.btn_initial)
         self.button_layout.addWidget(self.btn_ming)
         self.button_layout.addWidget(self.btn_maxs)
+        # self.button_layout.addWidget(self.btn_elv)
 
         self.main_layout.addLayout(self.button_layout)
 
@@ -49,16 +52,17 @@ class MainWindow(QMainWindow):
         self.initial_screen = InitialScreen()
         self.ming_screen = MinG()
         self.maxs_screen = MaxS()
-        self.elv_screen = ELVScreen()
+        # self.elv_screen = ELVScreen()
 
         self.stacked_widget.addWidget(self.initial_screen)
         self.stacked_widget.addWidget(self.ming_screen)
         self.stacked_widget.addWidget(self.maxs_screen)
-        self.stacked_widget.addWidget(self.elv_screen)
+        # self.stacked_widget.addWidget(self.elv_screen)
 
         self.btn_initial.clicked.connect(lambda: self.set_active_button(self.btn_initial, self.initial_screen))
         self.btn_ming.clicked.connect(lambda: self.set_active_button(self.btn_ming, self.ming_screen))
         self.btn_maxs.clicked.connect(lambda: self.set_active_button(self.btn_maxs, self.maxs_screen))
+        # self.btn_elv.clicked.connect(lambda: self.set_active_button(self.btn_elv, self.elv_screen))
 
         self.active_button = None
 
