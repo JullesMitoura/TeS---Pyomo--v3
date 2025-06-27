@@ -84,19 +84,21 @@ Mitoura, Julles.; Mariano, A.P. Gasification of Lignocellulosic Waste in Supercr
 
 #### 1.1 Cálculo dos Coeficientes de Fugacidade ($\phi_i$):
 
+##### **Equações Cúbicas de Estado (PR, SRK, RK)**
+
 Para cada componente:
 
-- Temperatura crítica: ($T_{c,i}$)
-- Pressão crítica: ($P_{c,i}$)
-- Fator acêntrico: ($\omega_i$)
+* Temperatura crítica: ($T_{c,i}$)
+* Pressão crítica: ($P_{c,i}$)
+* Fator acêntrico: ($\omega_i$)
 
 Com base na equação de estado escolhida, os seguintes parâmetros são definidos:
 
-- Constantes específicas da EOS: ($\Omega_a$), ($\Omega_b$)
-- Parâmetro de atração ajustado à temperatura:
+* Constantes específicas da EOS: ($\Omega_a$), ($\Omega_b$)
+* Parâmetro de atração ajustado à temperatura:
 
 $$
-m_i = 
+m_i =
 \begin{cases}
 0.37464 + 1.54226 \cdot \omega_i - 0.26992 \cdot \omega_i^2 & \text{(Peng-Robinson)} \\
 0.480 + 1.574 \cdot \omega_i - 0.176 \cdot \omega_i^2 & \text{(SRK)} \\
@@ -104,9 +106,8 @@ m_i =
 \end{cases}
 $$
 
-
 $$
-\alpha_i = 
+\alpha_i =
 \begin{cases}
 \left(1 + m_i(1 - \sqrt{T/T_{c,i}})\right)^2 & \text{(PR ou SRK)} \\
 \frac{1}{\sqrt{T/T_{c,i}}} & \text{(RK)}
@@ -119,12 +120,9 @@ a_i = \Omega_a \cdot \left( \frac{R^2 T_{c,i}^2}{P_{c,i}} \right) \cdot \alpha_i
 b_i = \Omega_b \cdot \left( \frac{R T_{c,i}}{P_{c,i}} \right)
 $$
 
+* Parâmetro de interação binária: ($k_{ij}$)
 
-- Parâmetro de interação binária: ($k_{ij}$)
-
-$$
-a_{ij} = (1 - k_{ij}) \cdot \sqrt{a_i \cdot a_j}
-$$
+$$a_{ij} = (1 - k_{ij}) \cdot \sqrt{a_i \cdot a_j}$$
 
 $$
 a_{\text{mix}} = \sum_i \sum_j y_i y_j a_{ij}
@@ -138,52 +136,62 @@ A = \frac{a_{\text{mix}} P}{R^2 T^2}
 B = \frac{b_{\text{mix}} P}{R T}
 $$
 
-
 A equação cúbica é escrita como:
 
-$$
-Z^3 + c_2 Z^2 + c_1 Z + c_0 = 0
-$$
+$$Z^3 + c_2 Z^2 + c_1 Z + c_0 = 0$$
 
 Os coeficientes dependem da EOS:
 
-- **Peng-Robinson (PR):**
+* **Peng-Robinson (PR):**
 
-$$
-Z^3 + (B - 1)Z^2 + (A - 2B - 3B^2)Z + (-AB + B^2 + B^3) = 0
-$$
+    $$
+    Z^3 + (B - 1)Z^2 + (A - 2B - 3B^2)Z + (-AB + B^2 + B^3) = 0
+    $$
 
-- **SRK / RK:**
+* **SRK / RK:**
 
-$$
-Z^3 - Z^2 + (A - B - B^2)Z - AB = 0
-$$
+    $$
+    Z^3 - Z^2 + (A - B - B^2)Z - AB = 0
+    $$
 
 Seleciona-se a maior raiz real positiva ($Z$) que representa a fase gás.
 
 Para cada componente ($i$):
 
-$$
-\ln \phi_i = \frac{b_i}{b_{\text{mix}}}(Z - 1) - \ln(Z - B) - \frac{A}{B} \cdot \left( \frac{2 \sum_j y_j a_{ij}}{a_{\text{mix}}} - \frac{b_i}{b_{\text{mix}}} \right) \cdot f(Z, B)
-$$
+$$\ln \phi_i = \frac{b_i}{b_{\text{mix}}}(Z - 1) - \ln(Z - B) - \frac{A}{B} \cdot \left( \frac{2 \sum_j y_j a_{ij}}{a_{\text{mix}}} - \frac{b_i}{b_{\text{mix}}} \right) \cdot f(Z, B)$$
 
 Com:
 
-- Para PR:
+* Para PR:
 
-$$
-f(Z, B) = \frac{1}{2\sqrt{2}} \cdot \ln\left( \frac{Z + (1 + \sqrt{2})B}{Z + (1 - \sqrt{2})B} \right)
-$$
+    $$
+    f(Z, B) = \frac{1}{2\sqrt{2}} \cdot \ln\left( \frac{Z + (1 + \sqrt{2})B}{Z + (1 - \sqrt{2})B} \right)
+    $$
 
-- Para SRK/RK:
+* Para SRK/RK:
 
-$$
-f(Z, B) = \ln\left(1 + \frac{B}{Z} \right)
-$$
+    $$
+    f(Z, B) = \ln\left(1 + \frac{B}{Z} \right)
+    $$
 
-$$
-\phi_i = \exp(\ln \phi_i)
-$$
+##### **Equação de Virial (2º Termo)**
+
+A equação de Virial truncada no segundo termo relaciona o fator de compressibilidade com a pressão:
+
+$$Z = 1 + \frac{B_{mix} P}{RT}$$
+
+O segundo coeficiente de Virial para a mistura ($B_{mix}$) é calculado usando a seguinte regra de mistura:
+
+$$B_{mix} = \sum_{i=1}^{NC} \sum_{j=1}^{NC} y_i y_j B_{ij}$$
+
+Onde $B_{ii}$ é o coeficiente do componente puro e $B_{ij}$ é o coeficiente cruzado para o par i-j. Esses coeficientes são dependentes da temperatura e geralmente são obtidos por correlações empíricas baseadas em propriedades críticas.
+
+O logaritmo do coeficiente de fugacidade para cada componente *i* na mistura é dado por:
+
+$$\ln \phi_i = \left[ 2 \sum_{j=1}^{NC} y_j B_{ij} - B_{mix} \right] \frac{P}{RT}$$
+
+Finalmente, para qualquer um dos modelos:
+$$\phi_i = \exp(\ln \phi_i)$$
 
 Para componentes sólidos, assume-se ($\phi_i = 1.0$).
 
@@ -281,61 +289,6 @@ A rotina descrita aqui pode ser encontrada no seguinte camiho:
     └── entropy.py
 ```
 
-
-### 3. Equilibrio Liquido-Vapor (*ELV*):
-
-Este módulo é projetado para a análise de sistemas em **Equilíbrio Líquido-Vapor (ELV)**. A sua principal funcionalidade é a determinação do **parâmetro de interação binária ($k_{ij}$)** que melhor ajusta os dados de uma equação de estado (EOS) a dados experimentais. O ajuste pode ser realizado para dados **isotérmicos** (P-x,y a T constante) ou **isobáricos** (T-x,y a P constante).
-
-O princípio fundamental para o equilíbrio de fases é a igualdade de fugacidade de cada componente *i* em ambas as fases, líquida (L) e vapor (V):
-
-$$f_i^L = f_i^V$$
-
-Expandindo esta relação utilizando coeficientes de fugacidade ($\phi_i$), frações molares ($x_i$ na fase líquida, $y_i$ na fase vapor) e a pressão do sistema ($P$), temos:
-
-$$\phi_i^L x_i P = \phi_i^V y_i P \implies \phi_i^L x_i = \phi_i^V y_i$$
-
-Os coeficientes de fugacidade ($\phi_i^L$ e $\phi_i^V$) são calculados utilizando equações cúbicas de estado. As mesmas opções disponíveis no módulo *minG* são suportadas:
-
-* Peng-Robinson (PR)
-* Soave-Redlich-Kwong (SRK)
-* Redlich-Kwong (RK)
-
-O detalhamento do cálculo dos coeficientes de fugacidade pode ser encontrado na seção 1.1 deste texto, pois a metodologia é a mesma.
-
-#### Formulação do Problema de Otimização
-
-Para encontrar o valor ótimo do parâmetro de interação binária ($k_{ij}$), o módulo estrutura um problema de otimização não-linear utilizando a biblioteca **Pyomo**.
-
-A **função objetivo** consiste em minimizar o erro quadrático relativo entre os valores calculados pelo modelo e os dados experimentais. Para um ajuste isotérmico, a função objetivo é:
-
-$$\min \sum_{k=1}^{N_{pontos}} \left( \frac{P_{calc, k} - P_{exp, k}}{P_{exp, k}} \right)^2$$
-
-Onde $P_{calc}$ é a pressão calculada pelo modelo e $P_{exp}$ é a pressão experimental para cada ponto. Uma função análoga é usada para a temperatura em ajustes isobáricos.
-
-As **restrições** do problema garantem que as condições de equilíbrio termodinâmico sejam satisfeitas em cada ponto experimental:
-
-1.  **Igualdade de Fugacidade**: A restrição fundamental do ELV é aplicada para cada componente.
-
-$$
-\phi_i^L x_i = \phi_i^V y_i \quad \text{para } i=1,\ldots,NC
-$$
-
-2.  **Validade da Equação de Estado**: A equação cúbica de estado (PR, SRK ou RK) deve ser resolvida e satisfeita para ambas as fases, líquida e vapor, determinando os fatores de compressibilidade ($Z_L$ e $Z_V$).
-
-3.  **Soma das Frações Molares**: A soma das frações molares na fase vapor deve ser igual a 1.
-
-$$
-\sum_{i=1}^{NC} y_i = 1
-$$
-
-
-A rotina descrita aqui pode ser encontrada no seguinte camiho:
-
-```
-└── 📁app
-    └── 📁auxiliar_func
-         └── elv_solver.py
-```
 
 
 ### Solver IPOPT:
