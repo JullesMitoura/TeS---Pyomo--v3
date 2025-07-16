@@ -1,6 +1,11 @@
 ## Themodynamic Equilibrium Simulation *v3*
 
 O TeS - Themodynamic Equilibrium Simulation é um software de simulação de equilíbrio termodinâmico de código aberto que tem por objetivo otimizar os estudos de termodinâmica de equilíbrio e assuntos correlatos.
+
+O link abaixo contém o executável para download:
+
+https://drive.google.com/drive/folders/1LcWpOegJ5ZtYXLJ4KtCQ49mqevA0mckz?usp=share_link
+
 O TeS é indicado para analises iniciais acerca de sistemas reacionais. A atual versão contém três módulos de simulação:
 
 ### 1. Minimização de Energia de Gibbs (*minG*):
